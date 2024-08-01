@@ -3,7 +3,8 @@ import { ProjectController } from "../controller/ProjectController";
 import { body, param } from "express-validator";
 import { handleInputErrors } from "../middleware/validation";
 import { taskController } from "../controller/TaskController";
-import { validationProjectExists } from "../middleware/project";
+import { projectExists } from "../middleware/project";
+import { taskExists, tasksBelongsToProject } from "../middleware/task";
 
 const router = Router()
 
@@ -45,9 +46,52 @@ router.delete('/:id',
 )
 
 //Routes Tasks
+router.param('projectId', projectExists)
+
 router.post('/:projectId/tasks',
-    validationProjectExists,
+    body('name')
+        .notEmpty().withMessage('The Task Name is required'),
+    body('description')
+        .notEmpty().withMessage('The Description is required'),
+    handleInputErrors,
     taskController.createTask
+)
+
+router.get('/:projectId/tasks',
+    taskController.getProjectTasks
+)
+
+router.param('taskId', taskExists)
+router.param('taskId', tasksBelongsToProject)
+
+router.get('/:projectId/tasks/:taskId',
+    param('taskId').isMongoId().withMessage('ID not valid'),
+    handleInputErrors,
+    taskController.getTaskById
+)
+
+router.put('/:projectId/tasks/:taskId',
+    param('taskId').isMongoId().withMessage('ID not valid'),
+    body('name')
+        .notEmpty().withMessage('The Task Name is required'),
+    body('description')
+        .notEmpty().withMessage('The Description is required'),
+    handleInputErrors,
+    taskController.updateTask
+)
+
+router.delete('/:projectId/tasks/:taskId',
+    param('taskId').isMongoId().withMessage('ID not valid'),
+    handleInputErrors,
+    taskController.deleteTask
+)
+
+router.post('/:projectId/tasks/:taskId/status',
+    param('taskId').isMongoId().withMessage('ID not valid'),
+    body('status')
+        .notEmpty().withMessage('The Status is required'),
+    handleInputErrors,
+    taskController.updateStatus
 )
 
 export default router

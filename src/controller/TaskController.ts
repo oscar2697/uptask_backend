@@ -10,7 +10,61 @@ export class taskController {
             await Promise.allSettled([task.save(), req.project.save()])
             res.send('Task created succesfully')
         } catch (error) {
-            console.log(error)
+            res.status(500).json({error: 'Something went wrong'})
+        }
+    }
+
+    static getProjectTasks = async (req: Request, res: Response) => {
+        try {
+            const tasks = await Task.find({project: req.project.id}).populate('project')
+            res.json(tasks)
+        } catch (error) {
+            res.status(500).json({error: 'Something went wrong'})
+        }
+    }
+
+    static getTaskById = async (req: Request, res: Response) => {
+        try {
+            res.json(req.task)
+        } catch (error) {
+            res.status(500).json({error: 'Something went wrong'})
+        }
+    }
+
+    static updateTask = async (req: Request, res: Response) => {
+        try {
+            req.task.name = req.body.name
+            req.task.description = req.body.description
+            
+            await req.task.save()
+
+            res.send('Task Updated Successfully')
+        } catch (error) {
+            res.status(500).json({error: 'Something went wrong'})
+        }
+    }
+
+    static deleteTask = async (req: Request, res: Response) => {
+        try {
+            req.project.task = req.project.task.filter((task) => task.toString() !== req.task.id.toString())
+
+            await Promise.allSettled([req.task.deleteOne(), req.project.save()])
+
+            res.send('Task Deleted Successfully')
+        } catch (error) {
+            res.status(500).json({error: 'Something went wrong'})
+        }
+    }
+
+    static updateStatus = async (req: Request, res: Response) => {
+        try {
+            const {status} = req.body
+            req.task.status = status
+
+            await req.task.save()
+            res.send('Task Status Updated Successfully')
+        } catch (error) {
+            res.status(500).json({error: 'Something went wrong'})
         }
     }
 }
