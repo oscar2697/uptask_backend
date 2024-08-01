@@ -18,7 +18,7 @@ export async function validationProjectExists(req: Request, res: Response, next:
             const error = new Error('Project Not Found')
             return res.status(404).json({error: error.message})
         }
-        
+
         req.project = project
         next()
     } catch (error) {
