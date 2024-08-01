@@ -24,7 +24,7 @@ const ProjectSchema: Schema = new Schema({
         required: true,
         trim: true,
     },
-    tasks: [
+    task: [
         {
             type: Types.ObjectId,
             ref: 'Task'
