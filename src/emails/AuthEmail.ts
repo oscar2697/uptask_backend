@@ -12,7 +12,7 @@ export class AuthEmail {
             from: 'UpTask <admin@uptask.com>',
             to: user.email,
             subject: 'UpTask - Verify Your Email',
-            text: 'UpTask -  Verify Your Email',
+            text: 'UpTask - Verify Your Email',
             html: `
                 <p>Hi: ${user.name}, Thanks for signing up with UpTask! </p>
                 <p>You must follow this link within 10 minutes of registration to activate your account:</p>

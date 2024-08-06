@@ -91,18 +91,55 @@ export class AuthController {
                 })
 
                 const error = new Error('Account not confirmed, We sent an Email to confirm your Account')
-                res.status(401).json({error: error.message})
+                return res.status(401).json({error: error.message})
             }
 
             //Check Password
             const isPasswordCorrect = await checkPassword(password, user.password)
-            
+
             if(!isPasswordCorrect) {
                 const error = new Error('Invalid username or password')
-                res.status(401).json({error: error.message})
+                return res.status(401).json({error: error.message})
             }
 
             res.send('Great!')
+        } catch (error) {
+            res.status(500).json({error: 'Something went Wrong'})
+        }
+    }
+
+    static requestConfirmationCode = async (req: Request, res: Response) => {
+        try {
+            const {email} = req.body
+
+            //user Exists 
+            const user = await Auth.findOne({email})
+
+            if(!user) {
+                const error =  new Error('Email is not Registered')
+                return res.status(404).json({error: error.message})
+            }
+
+            if(user.confirmed) {
+                const error =  new Error('Email is already Confirmed!')
+                return res.status(409).json({error: error.message})
+            }
+
+            //Generate Token
+            const token = new Token()
+            token.token = generateToken()
+            token.user = user.id
+
+            //Send email
+            AuthEmail.sendConfirmationEmail({
+                email: user.email,
+                name: user.name,
+                token: token.token
+            })
+
+            await Promise.allSettled([user.save(),  token.save()])
+
+            res.send('Your new Token was sent, check your Email')
         } catch (error) {
             res.status(500).json({error: 'Something went Wrong'})
         }
