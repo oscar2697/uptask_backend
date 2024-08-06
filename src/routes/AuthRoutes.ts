@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { AuthController } from "../controller/AuthController";
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 import { handleInputErrors } from "../middleware/validation";
 
 const router = Router()
@@ -12,7 +12,7 @@ router.post('/create-account',
         .isLength({ min: 8 }).withMessage('Enter a combination of at least 8 letters'),
     body('password_confirmation').custom((value, { req }) => {
         if (value !== req.body.password) {
-            throw new Error('The Password does no match')
+            throw new Error('The Passwords does not match')
         }
         return true
     }),
@@ -43,6 +43,35 @@ router.post('/request-code',
         .isEmail().withMessage('Email not valid'),
     handleInputErrors,
     AuthController.requestConfirmationCode
+)
+
+router.post('/forgot-password',
+    body('email')
+        .isEmail().withMessage('Email not valid'),
+    handleInputErrors,
+    AuthController.forgotPassword
+)
+
+router.post('/validate-token',
+    body('token')
+        .notEmpty().withMessage("Please enter your token"),
+    handleInputErrors,
+    AuthController.validateToken
+)
+
+router.post('/update-password/:token',
+    param('token')
+        .isNumeric().withMessage('Token not valid'),
+    body('password')
+        .isLength({ min: 8 }).withMessage('Enter a combination of at least 8 letters'),
+    body('password_confirmation').custom((value, { req }) => {
+        if (value !== req.body.password) {
+            throw new Error('The Passwords does not match')
+        }
+        return true
+    }),
+    handleInputErrors,
+    AuthController.updatePassword
 )
 
 export default router

@@ -144,4 +144,73 @@ export class AuthController {
             res.status(500).json({error: 'Something went Wrong'})
         }
     }
+
+    static forgotPassword = async (req: Request, res: Response) => {
+        try {
+            const {email} = req.body
+
+            //user Exists 
+            const user = await Auth.findOne({email})
+
+            if(!user) {
+                const error =  new Error('Email is not Registered')
+                return res.status(404).json({error: error.message})
+            }
+
+            //Generate Token
+            const token = new Token()
+            token.token = generateToken()
+            token.user = user.id
+            await token.save()
+
+            //Send email
+            AuthEmail.sendPasswordResetToken({
+                email: user.email,
+                name: user.name,
+                token: token.token
+            })
+
+            res.send('Check your email and follow the instructions')
+        } catch (error) {
+            res.status(500).json({error: 'Something went Wrong'})
+        }
+    }
+
+    static validateToken = async (req: Request, res: Response) => {
+        try {
+            const {token} = req.body
+            const tokenExists = await Token.findOne({token})
+            
+            if(!tokenExists) {
+                const error = new Error('Token not Valid')
+                return res.status(404).json({error: error.message})
+            }
+
+            res.send('Token valid, Enter your new password')
+        } catch (error) {
+            res.status(500).json({error: 'Something went Wrong'})
+        }
+    }
+
+    static updatePassword = async (req: Request, res: Response) => {
+        try {
+            const {token} = req.params
+            const {password} = req.body
+            const tokenExists = await Token.findOne({token})
+            
+            if(!tokenExists) {
+                const error = new Error('Token not Valid')
+                return res.status(404).json({error: error.message})
+            }
+
+            const user = await Auth.findById(tokenExists.user)
+            user.password = await hashPassword(password)
+
+            await Promise.allSettled([user.save(), tokenExists.deleteOne()])
+
+            res.send('Password reset successfully')
+        } catch (error) {
+            res.status(500).json({error: 'Something went Wrong'})
+        }
+    }
 }
