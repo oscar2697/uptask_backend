@@ -28,6 +28,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
 
             if(user) {
                 req.user = user
+                next()
             } else {
                 res.status(500).json({error: 'Token not valid'})
             }
@@ -35,6 +36,4 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
     } catch (error) {
         res.status(500).json({error: 'Token not valid'})
     }
-
-    next()
 }

@@ -33,8 +33,8 @@ const ProjectSchema: Schema = new Schema({
         }
     ],
     manager: {
-            type: Types.ObjectId,
-            ref: 'Auth'
+        type: Types.ObjectId,
+        ref: 'Auth'
     }
 }, { timestamps: true })
 
