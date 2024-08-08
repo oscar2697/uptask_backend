@@ -1,11 +1,13 @@
 import mongoose, { Schema, Document, PopulatedDoc, Types } from "mongoose";
 import { ITask } from "./Task";
+import { IAuth } from "./Auth";
 
-export interface IProject extends Document  {
+export interface IProject extends Document {
     projectName: string //TypeScript
     clientName: string
     description: string
-    task: PopulatedDoc<ITask & Document>[] 
+    task: PopulatedDoc<ITask & Document>[]
+    manager: PopulatedDoc<IAuth & Document>
 }
 
 const ProjectSchema: Schema = new Schema({
@@ -15,12 +17,12 @@ const ProjectSchema: Schema = new Schema({
         trim: true,
     },
     clientName: {
-        type: String, 
+        type: String,
         required: true,
         trim: true,
     },
     description: {
-        type: String, 
+        type: String,
         required: true,
         trim: true,
     },
@@ -29,8 +31,12 @@ const ProjectSchema: Schema = new Schema({
             type: Types.ObjectId,
             ref: 'Task'
         }
-    ]
-}, {timestamps: true}) 
+    ],
+    manager: {
+            type: Types.ObjectId,
+            ref: 'Auth'
+    }
+}, { timestamps: true })
 
 const Project = mongoose.model<IProject>('Project', ProjectSchema)
 export default Project
