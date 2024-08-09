@@ -6,6 +6,7 @@ import { taskController } from "../controller/TaskController";
 import { projectExists } from "../middleware/project";
 import { taskExists, tasksBelongsToProject } from "../middleware/task";
 import { authenticate } from "../middleware/auth";
+import { teamMemberController } from "../controller/TeamController";
 
 const router = Router()
 router.use(authenticate)
@@ -23,13 +24,13 @@ router.post('/',
 
 router.get('/', ProjectController.getAllProjects)
 
-router.get('/:id', 
+router.get('/:id',
     param('id').isMongoId().withMessage('ID not valid'),
     handleInputErrors,
     ProjectController.getAProjectById
 )
 
-router.put('/:id', 
+router.put('/:id',
     param('id').isMongoId().withMessage('ID not valid'),
     body('projectName')
         .notEmpty().withMessage('The Project Name is required'),
@@ -41,7 +42,7 @@ router.put('/:id',
     ProjectController.updateAProject
 )
 
-router.delete('/:id', 
+router.delete('/:id',
     param('id').isMongoId().withMessage('ID not valid'),
     handleInputErrors,
     ProjectController.deleteAProject
@@ -94,6 +95,32 @@ router.post('/:projectId/tasks/:taskId/status',
         .notEmpty().withMessage('The Status is required'),
     handleInputErrors,
     taskController.updateStatus
+)
+
+//Routes for teams
+router.post('/:projectId/team/find',
+    body('email')
+        .isEmail().toLowerCase().withMessage('Email address not found'),
+    handleInputErrors,
+    teamMemberController.findMemberByEmail
+)
+
+router.get('/:projectId/team',
+    teamMemberController.getProjectTeam
+)
+
+router.post('/:projectId/team',
+    body('id')
+        .isMongoId().withMessage('ID not valid'),
+    handleInputErrors,
+    teamMemberController.addMemberById
+)
+
+router.delete('/:projectId/team',
+    body('id')
+        .isMongoId().withMessage('ID not valid'),
+    handleInputErrors,
+    teamMemberController.removeMemberById
 )
 
 export default router
