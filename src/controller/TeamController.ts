@@ -10,7 +10,7 @@ export class teamMemberController {
         const user = await Auth.findOne({ email }).select('id email name')
 
         if (!user) {
-            const error = new Error('User not found')
+            const error = new Error("Looks like that person isn't a UpTask member yet. Add their email address to invite them.")
             return res.status(404).json({ error: error.message })
         }
         res.json(user)
