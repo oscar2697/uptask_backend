@@ -25,7 +25,8 @@ export class taskController {
 
     static getTaskById = async (req: Request, res: Response) => {
         try {
-            res.json(req.task)
+            const task = await Task.findById(req.task.id).populate({path: 'completedBy.user', select: 'id name email'})
+            res.json(task)
         } catch (error) {
             res.status(500).json({error: 'Something went wrong'})
         }
@@ -35,7 +36,7 @@ export class taskController {
         try {
             req.task.name = req.body.name
             req.task.description = req.body.description
-            
+
             await req.task.save()
 
             res.send('Task Updated Successfully')
@@ -60,6 +61,13 @@ export class taskController {
         try {
             const {status} = req.body
             req.task.status = status
+
+            const data = {
+                user: req.user.id,
+                status
+            }
+
+            req.task.completedBy.push(data)
 
             await req.task.save()
             res.send('Task Status Updated Successfully')
