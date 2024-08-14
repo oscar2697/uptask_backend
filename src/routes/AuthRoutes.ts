@@ -75,9 +75,36 @@ router.post('/update-password/:token',
     AuthController.updatePassword
 )
 
-router.get('/user', 
+router.get('/user',
     authenticate,
     AuthController.user
+)
+
+//Profile
+router.put('/profile',
+    authenticate,
+    body('name')
+        .notEmpty().withMessage("What's your name?"),
+    body('email')
+        .isEmail().withMessage('Please enter a valid email address'),
+    handleInputErrors,
+    AuthController.updateProfile
+)
+
+router.post('/update-password',
+    authenticate,
+    body('current_password')
+        .notEmpty().withMessage("What's your password?"),
+    body('password')
+        .isLength({ min: 8 }).withMessage('Enter a combination of at least 8 letters'),
+    body('password_confirmation').custom((value, { req }) => {
+        if (value !== req.body.password) {
+            throw new Error('The Passwords does not match')
+        }
+        return true
+    }),
+    handleInputErrors,
+    AuthController.updateCurrentUserPassword
 )
 
 export default router
