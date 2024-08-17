@@ -53,26 +53,13 @@ export class ProjectController {
     }
 
     static updateAProject = async (req: Request, res: Response) => {
-        const {id} = req.params
 
         try {
-            const project = await Project.findById(id)
+            req.project.clientName = req.body.clientName
+            req.project.projectName = req.body.projectName
+            req.project.description = req.body.description
 
-            if(!project) {
-                const error = new Error('Project Not Found')
-                return res.status(404).json({error: error.message})
-            }
-
-            if(project.manager.toString() !== req.user.id.toString()) {
-                const error = new Error('You are not allowed to perform this action')
-                return res.status(404).json({error: error.message})
-            }
-
-            project.clientName = req.body.clientName
-            project.projectName = req.body.projectName
-            project.description = req.body.description
-
-            await project.save()
+            await req.project.save()
             res.send('Updated Project')
         } catch (error) {
             console.log(error)
@@ -80,22 +67,8 @@ export class ProjectController {
     }
 
     static deleteAProject = async (req: Request, res: Response) => {
-        const {id} = req.params
-
         try {
-            const project = await Project.findById(id)
-
-            if(!project) {
-                const error = new Error('Project Not Found')
-                return res.status(404).json({error: error.message})
-            }
-
-            if(project.manager.toString() !== req.user.id.toString()) {
-                const error = new Error('You are not allowed to perform this action')
-                return res.status(404).json({error: error.message})
-            }
-
-            await project.deleteOne()
+            await req.project.deleteOne()
             res.send('Project Deleted')
         } catch (error) {
             console.log(error)
